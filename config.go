@@ -205,6 +205,14 @@ func (c Config) check() string {
 	return ""
 }
 
+// missing says the lead's CLI isn't installed, or "". Not part of check: a config is valid on any machine.
+func (c Config) missing() string {
+	if _, err := exec.LookPath(c.Lead.CLI); err != nil {
+		return "the lead's cli, " + c.Lead.CLI + ", isn't installed here: pick another"
+	}
+	return ""
+}
+
 // describe is how an agent is shown to you and the lead: "personal opencode-go/x#max".
 func describe(a Agent) string {
 	model := a.Model

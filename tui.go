@@ -29,6 +29,7 @@ type model struct {
 	focusList        bool        // keys go to the agent list instead of the input
 	target           *agentState // the agent the input is messaging (m); nil = the lead
 	full             bool        // selected agent fullscreen
+	selecting        bool        // the mouse is left to the terminal, so text can be selected and copied
 	quitArmed        bool
 	setup            *setupForm
 	input            textinput.Model
@@ -94,8 +95,9 @@ func runTUI(resume string) error {
 		}
 		m.lead.lines = append(m.lead.lines, Line{Kind: "info", Text: "resumed the run from " + r.Saved.Format("Jan 02 15:04")})
 	}
-	if !saved {
+	if missing := cfg.missing(); !saved || missing != "" {
 		m.setup = m.newSetup()
+		m.setup.err = missing
 	}
 	prog = tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	_, err := prog.Run()
@@ -305,6 +307,12 @@ func (m *model) key(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "ctrl+s":
 		m.setup = m.newSetup()
 		return m, m.prefetchModels()
+	case "ctrl+y":
+		m.selecting = !m.selecting
+		if m.selecting {
+			return m, tea.DisableMouse
+		}
+		return m, tea.EnableMouseCellMotion
 	case "tab":
 		m.setFocusList(!m.focusList)
 		return m, nil
@@ -758,8 +766,10 @@ func (m *model) footer() string {
 	if m.status != "" {
 		return sYellow.Render(xansi.Truncate(" "+m.status, m.w, "…"))
 	}
-	keys := [][2]string{{"enter", "send"}, {"tab", "agents"}, {"pgup/pgdn", "scroll"}, {"^s", "setup"}, {"^c", "quit"}}
+	keys := [][2]string{{"enter", "send"}, {"tab", "agents"}, {"pgup/pgdn", "scroll"}, {"^y", "select text"}, {"^s", "setup"}, {"^c", "quit"}}
 	switch {
+	case m.selecting:
+		keys = [][2]string{{"drag", "select text"}, {"enter or right-click", "copy it"}, {"pgup/pgdn", "scroll"}, {"^y", "mouse back to agent-watch"}}
 	case m.full:
 		keys = [][2]string{{"↑↓", "other agent"}, {"m", "message it"}, {"x", "stop it"}, {"d", "remove it"}, {"pgup/pgdn", "scroll"}, {"enter/esc", "close"}}
 	case m.focusList:

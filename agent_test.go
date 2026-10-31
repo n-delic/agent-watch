@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -74,6 +75,29 @@ func TestConfigCheck(t *testing.T) {
 		if bad.check() == "" {
 			t.Errorf("%+v passed the check", bad)
 		}
+	}
+}
+
+// onPath makes PATH hold only stand-ins for these CLIs, so tests don't depend on what's installed.
+func onPath(t *testing.T, names ...string) {
+	dir := t.TempDir()
+	for _, n := range names {
+		if runtime.GOOS == "windows" {
+			n += ".exe"
+		}
+		if err := os.WriteFile(filepath.Join(dir, n), nil, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Setenv("PATH", dir)
+}
+
+// A lead on a CLI this machine doesn't have can't be saved, and opens the setup instead of failing every turn.
+func TestLeadCLIMissing(t *testing.T) {
+	onPath(t, "claude")
+	c := Config{Lead: Lead{CLI: "codex"}, Agents: []Agent{{Name: "claude", CLI: "claude"}}}
+	if c.check() != "" || !strings.Contains(c.missing(), "codex") {
+		t.Errorf("check %q, missing %q: want a valid config whose lead is missing", c.check(), c.missing())
 	}
 }
 
@@ -454,6 +478,7 @@ func TestLeadChangeKeepsConversation(t *testing.T) {
 	cfg := Config{Lead: Lead{CLI: "claude", Model: "opus", Effort: "high"}, Agents: []Agent{{Name: "claude", CLI: "claude"}}}
 	m := &model{cfg: cfg, global: cfg, lead: &agentState{name: "lead", cfg: cfg.lead(), session: "uuid-1", turns: 3,
 		lines: []Line{{Kind: "you", Text: "earlier"}}}}
+	onPath(t, "claude", "codex")
 	save := func(edit func(*Config)) {
 		m.setup = m.newSetup()
 		edit(&m.setup.cfg)

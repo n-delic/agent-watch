@@ -134,6 +134,9 @@ func (m *model) setupKey(k tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if f.err = cfg.check(); f.err != "" {
 			break
 		}
+		if f.err = cfg.missing(); f.err != "" {
+			break
+		}
 		if l := cfg.lead(); l != m.lead.cfg {
 			if m.lead.running {
 				f.err = "the lead is mid-turn; change it when it's done"
