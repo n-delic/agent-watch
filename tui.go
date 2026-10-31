@@ -90,7 +90,11 @@ func runTUI(resume string) error {
 		}
 		m.lead, m.notes = r.Lead.restore(), r.Notes
 		for _, a := range r.Agents {
-			m.workers = append(m.workers, a.restore())
+			w := a.restore()
+			m.workers = append(m.workers, w)
+			if a.Running {
+				m.notes = append(m.notes, fmt.Sprintf("[agent-watch] agent-watch was closed while agent %q was mid-turn, so its work may be partial. Check its worktree %s and send it a message to carry on.", w.name, w.dir))
+			}
 		}
 		m.lead.lines = append(m.lead.lines, Line{Kind: "info", Text: "resumed the run from " + r.Saved.Format("Jan 02 15:04")})
 	}
