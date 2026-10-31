@@ -13,6 +13,7 @@ import (
 	"github.com/n-delic/agent-watch/cli/claude"
 	"github.com/n-delic/agent-watch/cli/codex"
 	"github.com/n-delic/agent-watch/cli/opencode"
+	"github.com/n-delic/agent-watch/cli/zcode"
 )
 
 type (
@@ -23,7 +24,7 @@ type (
 )
 
 // allCLIs are the CLIs agent-watch can run, in the setup's order.
-var allCLIs = []cli.CLI{claude.CLI{}, opencode.CLI{}, codex.CLI{}, agy.CLI{}}
+var allCLIs = []cli.CLI{claude.CLI{}, opencode.CLI{}, codex.CLI{}, agy.CLI{}, zcode.CLI{}}
 
 // clis are their names.
 var clis = func() []string {

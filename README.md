@@ -10,7 +10,7 @@ Claude Code and opencode can both lead or work, on any account and model, so Cla
 
 ## Quick start
 
-**1. Have at least one agent CLI installed and logged in:** [Claude Code](https://claude.com/claude-code) (`claude`), [opencode](https://opencode.ai) (`opencode`), [Codex](https://github.com/openai/codex) (`codex`) or [Antigravity](https://antigravity.google/docs/cli) (`agy`), plus `git`.
+**1. Have at least one agent CLI installed and logged in:** [Claude Code](https://claude.com/claude-code) (`claude`), [opencode](https://opencode.ai) (`opencode`), [Codex](https://github.com/openai/codex) (`codex`), [Antigravity](https://antigravity.google/docs/cli) (`agy`) or ZCode's [`zcode-app-cli`](https://www.npmjs.com/package/zcode-app-cli) (`zcode`), plus `git`.
 
 **2. Install** a [release](https://github.com/n-delic/agent-watch/releases) for Linux or macOS:
 
@@ -64,7 +64,7 @@ What you see:
 - Transcripts in Claude Code style (`⏺` messages and tool calls, `⎿` output), with agents' markdown rendered: headings, lists, tables, code.
 - The agent list shows what each agent is doing right now: its latest tool call, or the start of its reply.
 - A live spinner per agent with elapsed time, tokens (↑ in ↓ out) and cost; every turn ends with how long it took. An agent that shows nothing for a minute says so; after 10 minutes it's stopped and the lead is told (a hung model would otherwise sit there until the 2-hour timeout).
-- A header with what the run has cost so far and the lead's usage, plus the selected agent's when it's on another account: Claude's 5-hour and 7-day windows (from its rate limit reports), Codex's plan windows (from its session files), opencode's spend today and over 7 days (`opencode stats`; it has no limits API), and for agy, which reports nothing, the tokens this run used, or its quota and reset time once it runs out.
+- A header with what the run has cost so far and the lead's usage, plus the selected agent's when it's on another account: Claude's 5-hour and 7-day windows (from its rate limit reports), Codex's plan windows (from its session files), opencode's spend today and over 7 days (`opencode stats`; it has no limits API), for zcode, the tokens this run used, and for agy, which reports nothing, the same, or its quota and reset time once it runs out.
 
 ## Agents
 
@@ -73,9 +73,9 @@ An agent is a CLI, an account and a model. A fresh setup has one per installed C
 | Field | |
 |---|---|
 | name | what you and the lead call it, e.g. `work` |
-| cli | `claude`, `opencode`, `codex` or `agy` |
-| account | `←→` picks a login found on this machine, or the CLI's default. opencode: the other databases next to its own (e.g. `~/.local/share/opencode/work.db`, run with `--standalone`). Claude: config dirs named `~/.claude-<name>` (as `CLAUDE_CONFIG_DIR`). Codex: homes named `~/.codex-<name>` (`CODEX_HOME`). agy has one login, so it has no account row. |
-| model, effort | empty for the CLI's default. Type on a model row to search a list: opencode's own models for that account (with prices and effort levels; `free` finds the free ones), agy's (`agy models`), or Claude's; Codex can't list its models, so type its model name. Effort then offers only that model's levels. |
+| cli | `claude`, `opencode`, `codex`, `agy` or `zcode` |
+| account | `←→` picks a login found on this machine, or the CLI's default. opencode: the other databases next to its own (e.g. `~/.local/share/opencode/work.db`, run with `--standalone`). Claude: config dirs named `~/.claude-<name>` (as `CLAUDE_CONFIG_DIR`). Codex: homes named `~/.codex-<name>` (`CODEX_HOME`). agy and zcode have one login, so they have no account row. |
+| model, effort | empty for the CLI's default. Type on a model row to search a list: opencode's own models for that account (with prices and effort levels; `free` finds the free ones), agy's (`agy models`), Claude's, or zcode's (Z.ai plan models, as `account:<plan>/<model>`); Codex can't list its models, so type its model name. Effort then offers only that model's levels. |
 | lead may use it | whether the lead can put it to work |
 
 The lead has its own cli, account, model and effort, separate from the agents: changing an agent never changes the lead. A fresh setup makes Claude Opus the lead: the idea is Opus's judgment on cheap agents' work. **may edit files** (off by default) gives it edit tools for small fixes, merges and housekeeping; a project file can switch it on with `"lead": {"edit": true}`. The setup is saved to `~/.config/agent-watch/config.json`.
@@ -138,7 +138,8 @@ Download the new release, or `git pull && go build -o agent-watch .`. Releases a
 - Claude's and Codex's token counts arrive at the end of each of their turns; opencode's and agy's update after every step.
 - Codex's limits update when one of its turns ends; agy shows only this run's tokens until its quota runs out.
 - A Codex or agy lead can always edit files (neither CLI can hold back edits and still run commands); without **may edit files** only its instructions keep it from editing.
-- Not yet supported: local model servers, another agy account.
+- zcode on Z.ai's Start Plan takes one request at a time per account, so run one zcode agent at a time, and not while the ZCode app is working.
+- Not yet supported: local model servers, another agy or zcode account.
 
 ## License
 
